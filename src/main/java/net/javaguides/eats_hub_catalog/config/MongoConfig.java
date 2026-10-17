@@ -10,6 +10,7 @@ import org.bson.UuidRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory;
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration;
@@ -64,6 +65,7 @@ public class MongoConfig extends AbstractReactiveMongoConfiguration {
     }
 
     @Bean
+    @Primary
     @Override
     public MongoClient reactiveMongoClient() {
         final ConnectionString connectionString = new ConnectionString(String.format("mongodb://%s:%d/%s", host, port, database));
@@ -84,7 +86,7 @@ public class MongoConfig extends AbstractReactiveMongoConfiguration {
     }
 
     @Bean
-    public ReactiveMongoTemplate reactiveMongoTemplate() {
-        return new ReactiveMongoTemplate(reactiveMongoClient(), getDatabaseName());
+    public ReactiveMongoTemplate reactiveMongoTemplate(MongoClient mongoClient) {
+        return new ReactiveMongoTemplate(mongoClient, getDatabaseName());
     }
 }
