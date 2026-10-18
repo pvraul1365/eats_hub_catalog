@@ -20,7 +20,7 @@ public class EatsHubCatalogApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		// Code to run on application startup
-		
+
 	}
 
 }
