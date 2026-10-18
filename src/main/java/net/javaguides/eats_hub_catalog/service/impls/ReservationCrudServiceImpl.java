@@ -33,7 +33,7 @@ public class ReservationCrudServiceImpl implements ReservationCrudService {
     private final RestaurantRepository restaurantRepository;
 
     @Override
-    public Mono<ReservationCollection> createReservation(ReservationCollection reservation) {
+    public Mono<ReservationCollection> createReservation(final ReservationCollection reservation) {
 
         return this.restaurantRepository.findById(reservation.getRestaurantId())
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("❌ Restaurant not found with id: " + reservation.getRestaurantId())))
@@ -48,13 +48,13 @@ public class ReservationCrudServiceImpl implements ReservationCrudService {
     }
 
     @Override
-    public Mono<ReservationCollection> readById(UUID reservationId) {
+    public Mono<ReservationCollection> readById(final UUID reservationId) {
         return this.reservationRepository.findById(reservationId)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("❌ Reservation not found with id: " + reservationId)));
     }
 
     @Override
-    public Flux<ReservationCollection> readByRestaurantId(UUID restaurantId, ReservationStatusEnum status) {
+    public Flux<ReservationCollection> readByRestaurantId(final UUID restaurantId, final ReservationStatusEnum status) {
         return this.restaurantRepository.findById(restaurantId)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("❌ Restaurant not found with id: " + restaurantId)))
                 .flatMapMany(restaurant -> {
@@ -69,12 +69,26 @@ public class ReservationCrudServiceImpl implements ReservationCrudService {
     }
 
     @Override
-    public Mono<ReservationCollection> updateReservation(UUID reservationId, ReservationCollection reservation) {
-        return null;
+    public Mono<ReservationCollection> updateReservation(final UUID reservationId, final ReservationCollection reservation) {
+        return this.reservationRepository.findById(reservationId)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("❌ Reservation not found with id: " + reservationId)))
+                .flatMap(existingReservation -> {
+                    log.info("📤 - Updating reservation with id: {}", reservationId);
+
+                    existingReservation.setStatus(reservation.getStatus());
+                    existingReservation.setNotes(reservation.getNotes());
+                    existingReservation.setCustomerName(reservation.getCustomerName());
+                    existingReservation.setDate(reservation.getDate());
+                    existingReservation.setPartySize(reservation.getPartySize());
+                    existingReservation.setTime(reservation.getTime());
+
+                    log.info("✅ - Updating reservation with id: {}", reservationId);
+                    return this.reservationRepository.save(existingReservation);
+                });
     }
 
     @Override
-    public Mono<Void> deleteReservation(UUID reservationId) {
+    public Mono<Void> deleteReservation(final UUID reservationId) {
         return null;
     }
 }
