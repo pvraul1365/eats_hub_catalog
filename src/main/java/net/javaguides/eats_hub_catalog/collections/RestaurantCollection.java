@@ -46,6 +46,7 @@ public class RestaurantCollection {
     private PriceEnum priceRange;
     private String openHours;
     private String logoUrl;
+    private String closeAt;
     private ContactInfo contactInfo;
 
     private List<Review> reviews;
