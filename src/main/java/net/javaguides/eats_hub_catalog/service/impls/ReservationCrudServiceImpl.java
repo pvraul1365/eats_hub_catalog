@@ -1,10 +1,12 @@
 package net.javaguides.eats_hub_catalog.service.impls;
 
+import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javaguides.eats_hub_catalog.collections.ReservationCollection;
 import net.javaguides.eats_hub_catalog.enums.ReservationStatusEnum;
+import net.javaguides.eats_hub_catalog.exception.ResourceNotFoundException;
 import net.javaguides.eats_hub_catalog.repository.ReservationRepository;
 import net.javaguides.eats_hub_catalog.repository.RestaurantRepository;
 import net.javaguides.eats_hub_catalog.service.definitions.ReservationCrudService;
@@ -30,7 +32,22 @@ public class ReservationCrudServiceImpl implements ReservationCrudService {
     private final RestaurantRepository restaurantRepository;
 
     @Override
-    public Mono<ReservationCollection> createReservation(ReservationCollection reservationCollection) {
+    public Mono<ReservationCollection> createReservation(ReservationCollection reservation) {
+
+        return this.restaurantRepository.findById(reservation.getRestaurantId())
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("❌ Restaurant not found with id: " + reservation.getRestaurantId())))
+                .flatMap(restaurant -> {
+                    if (Objects.isNull(reservation.getStatus())) {
+                        reservation.setStatus(ReservationStatusEnum.PENDING);
+                    }
+
+                    log.info("✅ - Creating reservation for restaurant: {}", restaurant.getName());
+                    return this.reservationRepository.save(reservation);
+                });
+    }
+
+    @Override
+    public Mono<ReservationCollection> readById(UUID reservationId) {
         return null;
     }
 

@@ -19,6 +19,8 @@ public interface ReservationCrudService {
 
     Mono<ReservationCollection> createReservation(ReservationCollection reservationCollection);
 
+    Mono<ReservationCollection> readById(UUID reservationId);
+
     Flux<ReservationCollection> readByRestaurantId(String restaurantId, ReservationStatusEnum status);
 
     Mono<ReservationCollection> updateReservation(UUID reservationId, ReservationCollection reservation);
