@@ -2,6 +2,7 @@ package net.javaguides.eats_hub_catalog.repository;
 
 import java.util.UUID;
 import net.javaguides.eats_hub_catalog.collections.ReservationCollection;
+import net.javaguides.eats_hub_catalog.enums.ReservationStatusEnum;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Flux;
 
@@ -18,5 +19,5 @@ public interface ReservationRepository extends ReactiveMongoRepository<Reservati
 
     Flux<ReservationCollection> findByRestaurantId(String restaurantId);
 
-    Flux<ReservationCollection> findByRestaurantIdAndStatus(String restaurantId, String status);
+    Flux<ReservationCollection> findByRestaurantIdAndStatus(String restaurantId, ReservationStatusEnum status);
 }

@@ -1,5 +1,6 @@
 package net.javaguides.eats_hub_catalog.service.impls;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -48,12 +49,23 @@ public class ReservationCrudServiceImpl implements ReservationCrudService {
 
     @Override
     public Mono<ReservationCollection> readById(UUID reservationId) {
-        return null;
+        return this.reservationRepository.findById(reservationId)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("❌ Reservation not found with id: " + reservationId)));
     }
 
     @Override
-    public Flux<ReservationCollection> readByRestaurantId(String restaurantId, ReservationStatusEnum status) {
-        return null;
+    public Flux<ReservationCollection> readByRestaurantId(UUID restaurantId, ReservationStatusEnum status) {
+        return this.restaurantRepository.findById(restaurantId)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("❌ Restaurant not found with id: " + restaurantId)))
+                .flatMapMany(restaurant -> {
+                    if (Objects.isNull(status)) {
+                        log.info("📤 - Reading all reservations for restaurant: {}", restaurant.getName());
+                        return this.reservationRepository.findByRestaurantId(restaurantId.toString());
+                    }
+
+                    log.info("📤 - Reading reservations for restaurant: {} with status: {}", restaurant.getName(), status);
+                    return this.reservationRepository.findByRestaurantIdAndStatus(restaurantId.toString(), status);
+                });
     }
 
     @Override
