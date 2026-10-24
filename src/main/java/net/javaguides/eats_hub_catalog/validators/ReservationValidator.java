@@ -4,14 +4,12 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javaguides.eats_hub_catalog.clients.PlannerMSClient;
 import net.javaguides.eats_hub_catalog.collections.ReservationCollection;
 import net.javaguides.eats_hub_catalog.collections.RestaurantCollection;
 import net.javaguides.eats_hub_catalog.exception.BusinessException;
-import net.javaguides.eats_hub_catalog.repository.ReservationRepository;
 import net.javaguides.eats_hub_catalog.repository.RestaurantRepository;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -81,7 +79,7 @@ public class ReservationValidator {
 
     public BusinessValidator<ReservationCollection> validateRestaurantIDBeforeUpdate() {
         log.info("🔍 - Validating restaurant ID before updating reservation");
-        
+
         return reservation -> {
             return this.restaurantRepository.findById(reservation.getRestaurantId())
                     .switchIfEmpty(Mono.error(new BusinessException("❌ Restaurant not found with id: " + reservation.getRestaurantId())))

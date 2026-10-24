@@ -11,6 +11,7 @@ import net.javaguides.eats_hub_catalog.exception.ResourceNotFoundException;
 import net.javaguides.eats_hub_catalog.repository.ReservationRepository;
 import net.javaguides.eats_hub_catalog.repository.RestaurantRepository;
 import net.javaguides.eats_hub_catalog.service.definitions.ReservationCrudService;
+import net.javaguides.eats_hub_catalog.validators.ReservationValidator;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,20 +32,30 @@ public class ReservationCrudServiceImpl implements ReservationCrudService {
 
     private final ReservationRepository reservationRepository;
     private final RestaurantRepository restaurantRepository;
+    private final ReservationValidator reservationValidator;
 
     @Override
     public Mono<ReservationCollection> createReservation(final ReservationCollection reservation) {
 
-        return this.restaurantRepository.findById(reservation.getRestaurantId())
-                .switchIfEmpty(Mono.error(new ResourceNotFoundException("❌ Restaurant not found with id: " + reservation.getRestaurantId())))
-                .flatMap(restaurant -> {
-                    if (Objects.isNull(reservation.getStatus())) {
-                        reservation.setStatus(ReservationStatusEnum.PENDING);
-                    }
+        final var validations = List.of(
+                this.reservationValidator.validateRestaurantClosed(),
+                this.reservationValidator.validateAvalaibility()
+        );
 
-                    log.info("✅ - Creating reservation for restaurant: {}", restaurant.getName());
-                    return this.reservationRepository.save(reservation);
+        return this.reservationValidator.applyValidations(reservation, validations)
+                .then(
+                        this.restaurantRepository.findById(reservation.getRestaurantId()))
+                                .switchIfEmpty(Mono.error(new ResourceNotFoundException("❌ Restaurant not found with id: " + reservation.getRestaurantId()))
+                                ).flatMap(restaurant -> {
+                        if (Objects.isNull(reservation.getStatus())) {
+                            reservation.setStatus(ReservationStatusEnum.PENDING);
+                        }
+
+                        log.info("✅ - Creating reservation for restaurant: {}", restaurant.getName());
+
+                        return this.reservationRepository.save(reservation);
                 });
+
     }
 
     @Override
@@ -70,8 +81,23 @@ public class ReservationCrudServiceImpl implements ReservationCrudService {
 
     @Override
     public Mono<ReservationCollection> updateReservation(final UUID reservationId, final ReservationCollection reservation) {
+
+        final var validations = List.of(
+                this.reservationValidator.validateRestaurantIDBeforeUpdate(),
+                this.reservationValidator.validateRestaurantClosed(),
+                this.reservationValidator.validateAvalaibility()
+        );
+
+
         return this.reservationRepository.findById(reservationId)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("❌ Reservation not found with id: " + reservationId)))
+                .flatMap(existingReservation -> {
+                            reservation.setId(existingReservation.getId());
+
+                            return this.reservationValidator.applyValidations(reservation, validations)
+                                    .thenReturn(existingReservation);
+                        })
+
                 .flatMap(existingReservation -> {
                     log.info("📤 - Updating reservation with id: {}", reservationId);
 
