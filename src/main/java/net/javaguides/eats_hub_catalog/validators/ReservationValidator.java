@@ -95,11 +95,11 @@ public class ReservationValidator {
     private boolean isRestaurantClosed(RestaurantCollection restaurant, String reservationTime) {
         log.info("🔍 - Checking if restaurant is closed for restaurantId: {} at time: {}", restaurant.getId(), reservationTime);
         try {
-            if (Objects.isNull(restaurant.getCloseAt()) || Objects.isNull(reservationTime)) {
+            if (Objects.isNull(restaurant.getClosedAt()) || Objects.isNull(reservationTime)) {
                 return true;
             }
 
-            LocalTime closeLocalTime = LocalTime.parse(restaurant.getCloseAt(), DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime closeLocalTime = LocalTime.parse(restaurant.getClosedAt(), DateTimeFormatter.ofPattern("HH:mm"));
             LocalTime reservationLocalTime = LocalTime.parse(reservationTime, DateTimeFormatter.ofPattern("HH:mm"));
 
             return reservationLocalTime.isAfter(closeLocalTime);
