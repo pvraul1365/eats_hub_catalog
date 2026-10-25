@@ -29,8 +29,8 @@ public interface RestaurantMapper {
         return restaurantCollections.map(this::toRestaurantResponse);
     }
 
-    default Mono<RestaurantResponse> toMonoRestaurantResponse(RestaurantCollection restaurantCollection){
-        return Mono.just(toRestaurantResponse(restaurantCollection));
+    default Mono<RestaurantResponse> toMonoRestaurantResponse(Mono<RestaurantCollection> restaurantCollection){
+        return restaurantCollection.map(this::toRestaurantResponse);
     }
 
     default Double calculateGlobalRaing(List<Review> reviews) {
