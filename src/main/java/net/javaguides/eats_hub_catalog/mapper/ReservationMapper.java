@@ -1,7 +1,6 @@
 package net.javaguides.eats_hub_catalog.mapper;
 
 import java.util.Objects;
-import jdk.jfr.MemoryAddress;
 import net.javaguides.eats_hub_catalog.collections.ReservationCollection;
 import net.javaguides.eats_hub_catalog.dtos.request.ReservationRequest;
 import net.javaguides.eats_hub_catalog.dtos.responses.ReservationResponse;
@@ -31,6 +30,7 @@ public interface ReservationMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "date", ignore = true)
     @Mapping(target = "time", ignore = true)
+    @Mapping(target = "status", ignore = true)
     ReservationCollection toReservationCollection(ReservationRequest reservationRequest);
 
     default Flux<ReservationResponse> toFluxReservationResponse(Flux<ReservationCollection> reservationCollections){
@@ -57,9 +57,6 @@ public interface ReservationMapper {
                 reservationCollection.setDate(dateTimeParts[0]);
                 reservationCollection.setTime(dateTimeParts[1]);
             }
-        } else {
-            reservationCollection.setDate(null);
-            reservationCollection.setTime(null);
         }
     }
 }
