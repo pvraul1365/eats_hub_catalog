@@ -33,27 +33,49 @@ public class ReservationBusinessServiceImpl implements ReservationBusinessServic
     private final ReservationMapper reservationMapper;
 
     @Override
-    public Mono<String> createReservation(ReservationRequest reservation) {
+    public Mono<String> createReservation(final ReservationRequest reservation) {
+        log.info("🔍 In ReservationBusinessServiceImpl createReservation");
+
+        return Mono.just(reservation)
+                .transform(reservationMapper::toMonoReservationCollection)
+                .flatMap(reservationCrudService::createReservation)
+                .map(createdReservation -> {
+                    log.info("✅ - In ReservationBusinessServiceImpl createReservation - Completed");
+                    return createdReservation.getId().toString();
+                });
+    }
+
+    @Override
+    public Mono<ReservationResponse> readByReservationId(final UUID reservationId) {
+        log.info("🔍 In ReservationBusinessServiceImpl readByReservationId");
+
+        return this.reservationCrudService.readById(reservationId)
+                .transform(this.reservationMapper::toMonoReservationResponse)
+                .doOnSuccess(response -> {;
+                    if (response != null) {
+                        log.info("✅ - In ReservationBusinessServiceImpl readByReservationId - Completed");
+                    } else {
+                        log.info("⚠️ - In ReservationBusinessServiceImpl readByReservationId - No reservation found for ID: {}", reservationId);
+                    }
+                });
+    }
+
+    @Override
+    public Flux<ReservationResponse> readByRestaurantId(final UUID restaurantId, final ReservationStatusEnum status) {
+        log.info("🔍 In ReservationBusinessServiceImpl readByRestaurantId");
+
+        return this.reservationCrudService.readByRestaurantId(restaurantId, status)
+                .transform(this.reservationMapper::toFluxReservationResponse)
+                .doOnComplete(() -> log.info("✅ - In ReservationBusinessServiceImpl readByRestaurantId - Completed"));
+    }
+
+    @Override
+    public Mono<ReservationResponse> updateReservation(final UUID reservationId, final ReservationRequest reservation) {
         return null;
     }
 
     @Override
-    public Mono<ReservationResponse> readByReservationId(UUID reservationId) {
-        return null;
-    }
-
-    @Override
-    public Flux<ReservationResponse> readByRestaurantId(UUID restaurantId, ReservationStatusEnum status) {
-        return null;
-    }
-
-    @Override
-    public Mono<ReservationResponse> updateReservation(UUID reservationId, ReservationRequest reservation) {
-        return null;
-    }
-
-    @Override
-    public Mono<Void> deleteReservation(UUID reservationId) {
+    public Mono<Void> deleteReservation(final UUID reservationId) {
         return null;
     }
 }
