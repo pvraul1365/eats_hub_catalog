@@ -10,6 +10,7 @@ import net.javaguides.eats_hub_catalog.mapper.ReservationMapper;
 import net.javaguides.eats_hub_catalog.repository.ReservationRepository;
 import net.javaguides.eats_hub_catalog.repository.RestaurantRepository;
 import net.javaguides.eats_hub_catalog.service.definitions.ReservationBusinessService;
+import net.javaguides.eats_hub_catalog.service.definitions.ReservationCrudService;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,7 +29,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class ReservationBusinessServiceImpl implements ReservationBusinessService {
 
-    private final ReservationRepository reservationRepository;
+    private final ReservationCrudService reservationCrudService;
     private final ReservationMapper reservationMapper;
 
     @Override
