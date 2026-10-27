@@ -71,11 +71,26 @@ public class ReservationBusinessServiceImpl implements ReservationBusinessServic
 
     @Override
     public Mono<ReservationResponse> updateReservation(final UUID reservationId, final ReservationRequest reservation) {
-        return null;
+        log.info("📥 In ReservationBusinessServiceImpl updateReservation");
+
+        return Mono.just(reservation)
+                .transform(reservationMapper::toMonoReservationCollection)
+                .flatMap(reservationCollection -> this.reservationCrudService.updateReservation(reservationId, reservationCollection))
+                .transform(this.reservationMapper::toMonoReservationResponse)
+                .doOnSuccess(response -> {
+                    if (response != null) {
+                        log.info("✅ - In ReservationBusinessServiceImpl updateReservation - Completed");
+                    } else {
+                        log.info("⚠️ - In ReservationBusinessServiceImpl updateReservation - No reservation found for ID: {}", reservationId);
+                    }
+                });
     }
 
     @Override
     public Mono<Void> deleteReservation(final UUID reservationId) {
-        return null;
+        log.info("🗑️ In ReservationBusinessServiceImpl deleteReservation");
+
+        return this.reservationCrudService.deleteReservation(reservationId)
+                .doOnSuccess(aVoid -> log.info("✅ - In ReservationBusinessServiceImpl deleteReservation - Completed"));
     }
 }
