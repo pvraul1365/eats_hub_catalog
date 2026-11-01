@@ -30,7 +30,7 @@ public class RestaurantCatalogRouter {
                 .GET(BASE_URL, request -> {
                     if (request.queryParam("cousinType").isPresent()) {
                         return restaurantCatalogHandler.getRestaurantByCousinType(request);
-                    } else if (request.queryParam("min").isPresent() && request.queryParam("max").isPresent()) {
+                    } else if (request.queryParam("prices").isPresent()) {
                         return restaurantCatalogHandler.getRestaurantBetweenPrice(request);
                     } else if (request.queryParam("city").isPresent()) {
                         return restaurantCatalogHandler.getRestaurantByCity(request);
