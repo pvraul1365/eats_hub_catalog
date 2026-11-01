@@ -20,25 +20,26 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 @Configuration
 public class RestaurantCatalogRouter {
 
-    private final static String BASE_URL = "/catalog/restaurants";
-    private final static String BY_NAME_URL = BASE_URL + "/{name}";
+    private final static String BY_NAME_URL = "/{name}";
 
     @Bean
     public RouterFunction<ServerResponse> restaurantCatalogRoutes(RestaurantCatalogHandler restaurantCatalogHandler) {
 
         return route()
-                .GET(BASE_URL, request -> {
-                    if (request.queryParam("cousinType").isPresent()) {
-                        return restaurantCatalogHandler.getRestaurantByCousinType(request);
-                    } else if (request.queryParam("prices").isPresent()) {
-                        return restaurantCatalogHandler.getRestaurantBetweenPrice(request);
-                    } else if (request.queryParam("city").isPresent()) {
-                        return restaurantCatalogHandler.getRestaurantByCity(request);
-                    } else {
-                        return restaurantCatalogHandler.getAllRestaurants(request);
-                    }
-                })
-                .GET(BY_NAME_URL, restaurantCatalogHandler::getRestaurantByName)
+                .path("/restaurants", builder -> builder
+                        .GET("", request -> {
+                            if (request.queryParam("cousinType").isPresent()) {
+                                return restaurantCatalogHandler.getRestaurantByCousinType(request);
+                            } else if (request.queryParam("prices").isPresent()) {
+                                return restaurantCatalogHandler.getRestaurantBetweenPrice(request);
+                            } else if (request.queryParam("city").isPresent()) {
+                                return restaurantCatalogHandler.getRestaurantByCity(request);
+                            } else {
+                                return restaurantCatalogHandler.getAllRestaurants(request);
+                            }
+                        })
+                        .GET(BY_NAME_URL, restaurantCatalogHandler::getRestaurantByName)
+                )
                 .build();
     }
 
