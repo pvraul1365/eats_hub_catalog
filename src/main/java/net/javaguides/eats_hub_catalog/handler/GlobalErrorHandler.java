@@ -1,6 +1,9 @@
 package net.javaguides.eats_hub_catalog.handler;
 
 import jakarta.validation.ValidationException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,8 +12,8 @@ import org.springframework.boot.webflux.error.ErrorWebExceptionHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import tools.jackson.databind.ObjectMapper;
@@ -61,6 +64,26 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
             errorType = ERROR_TYPE_INTERNAL;
         }
 
-        return null;
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put(RESPONSE_KEY_TIMESTAMP, LocalDateTime.now().toString());
+        errorResponse.put(RESPONSE_KEY_PATH, exchange.getRequest().getPath().value());
+        errorResponse.put(RESPONSE_KEY_STATUS, status.value());
+        errorResponse.put(RESPONSE_KEY_ERROR, status.getReasonPhrase());
+        errorResponse.put(RESPONSE_KEY_MESSAGE, message);
+        errorResponse.put(RESPONSE_KEY_ERROR_TYPE, errorType);
+
+        exchange.getResponse().setStatusCode(status);
+        exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        try {
+            final var bytes = objectMapper.writeValueAsBytes(errorResponse);
+            final var buffer = exchange.getResponse().bufferFactory().wrap(bytes);
+
+            return exchange.getResponse().writeWith(Mono.just(buffer));
+        } catch (Exception e) {
+            log.error("Error writing response: {}", e);
+            return Mono.error(e);
+        }
+
     }
 }
